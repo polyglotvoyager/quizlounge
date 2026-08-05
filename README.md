@@ -4,6 +4,8 @@ A place to answer quiz questions
 
 # Original code: Chat Example
 
+The original code is from https://github.com/gorilla/websocket/blob/main/examples/chat/main.go
+
 This application shows how to use the
 [websocket](https://github.com/gorilla/websocket) package to implement a simple
 web chat application.
