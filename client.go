@@ -72,7 +72,7 @@ func (c *Client) readPump() {
         }
         message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 
-        messageParts := strings.Split(string(message), "~")
+        messageParts := strings.Split(string(message), "Ω")
 
         c.hub.broadcast <- []byte(messageParts[0] + ": " + messageParts[1])
 
