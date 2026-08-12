@@ -34,6 +34,7 @@ func main() {
 
     mux := http.NewServeMux()
     mux.HandleFunc("GET /quizlounge", serveRegister)
+    mux.HandleFunc("GET /quizlounge/{$}", serveRegister)
     mux.HandleFunc("GET /quizlounge/play", servePlay)
     mux.HandleFunc("/quizlounge/ws", func(w http.ResponseWriter, r *http.Request) {
         serveWs(hub, w, r)
