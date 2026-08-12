@@ -4,11 +4,26 @@
 
 package main
 
+import (
+    "maps"
+    "strconv"
+)
+
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 
-var questionCycle = []string{"Q1", "Q2", "Q3"}
-var answerCycle = []string{"A1", "A2", "A3"}
+var questionCycle = []string{
+    "Chanter, Indicatif présent#Je ______",
+    "Être, Indicatif futur simple#Tu ______",
+    "Arriver, Subjonctif imparfait#Que nous ______",
+}
+
+var answerCycle = []string{
+    "chante",
+    "seras",
+    "arrivassions",
+}
+
 var cycleIndex = 0
 
 type Hub struct {
@@ -42,10 +57,21 @@ func newHub() *Hub {
     }
 }
 
+func (h *Hub) summarizeClientScores() string {
+    var result string
+
+    for c := range maps.Keys(h.clients) {
+        scoreStr := strconv.Itoa(c.score)
+        result += c.username + "'s score: " + scoreStr + "\n"
+    }
+    return result
+}
+
 func (h *Hub) newQuestion() {
-    h.question = questionCycle[cycleIndex]
+    h.question = "~" + questionCycle[cycleIndex]
     h.answer = answerCycle[cycleIndex]
     cycleIndex = (cycleIndex + 1) % len(questionCycle)
+    h.broadcast <- []byte(h.summarizeClientScores())
 }
 
 func (h *Hub) run() {

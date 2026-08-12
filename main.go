@@ -14,8 +14,12 @@ import (
 
 var addr = flag.String("addr", ":8100", "http service address")
 
-func serveHome(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "home.html")
+func serveRegister(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "register.html")
+}
+
+func servePlay(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "play.html")
 }
 
 func serveDebug(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +33,8 @@ func main() {
     hub.newQuestion()
 
     mux := http.NewServeMux()
-    mux.HandleFunc("GET /{$}", serveHome)
+    mux.HandleFunc("GET /{$}", serveRegister)
+    mux.HandleFunc("GET /play", servePlay)
     mux.HandleFunc("GET /debug", serveDebug)
     mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
         serveWs(hub, w, r)

@@ -9,6 +9,7 @@ import (
     "log"
     "net/http"
     "strings"
+    "strconv"
     "time"
 
     "github.com/gorilla/websocket"
@@ -47,6 +48,9 @@ type Client struct {
 
     // Buffered channel of outbound messages.
     send chan []byte
+
+    username string
+    score int
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -77,10 +81,12 @@ func (c *Client) readPump() {
         c.hub.broadcast <- []byte(messageParts[0] + ": " + messageParts[1])
 
         // check for match to question
-        if messageParts[1] == c.hub.answer {
+        if strings.TrimSpace(strings.ToLower(messageParts[1])) == c.hub.answer {
             c.hub.broadcast <- []byte(messageParts[0] + " got it right!")
+            c.score++
             c.hub.newQuestion()
             c.hub.broadcast <- []byte(c.hub.question)
+            c.send <- []byte("*" + strconv.Itoa(c.score))
         }
 
         // check for special message content
@@ -144,8 +150,11 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
         log.Println(err)
         return
     }
-    client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+    params := r.URL.Query()
+    username := params.Get("username")
+    client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), username: username}
     client.hub.register <- client
+    client.hub.broadcast <- []byte(username + " joined the game!")
     client.hub.broadcast <- []byte(hub.question)
 
     // Allow collection of memory referenced by the caller by doing all work in

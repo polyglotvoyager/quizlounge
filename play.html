@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Home - Quiz Lounge</title>
+    <script type="text/javascript">
+    window.onload = function () {
+      var urlParams = new URLSearchParams(window.location.search);
+      var username = urlParams.get("username");
+      console.log("playing as " + username);
+      document.getElementById("usernameLabel").innerText = username;
+
+      var conn;
+      var userinput = document.getElementById("userinput");
+      var prompt = document.getElementById("prompt");
+      var log = document.getElementById("log");
+
+      function setPoints(points) {
+        document.getElementById("pointsLabel").innerText = points.substring(1);
+      }
+
+      function setPrompt(message) {
+        prompt.innerText = message.substring(1).replaceAll("#", "\n");
+      }
+
+      function appendLog(item) {
+        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+        log.appendChild(item);
+        if (doScroll) {
+          log.scrollTop = log.scrollHeight - log.clientHeight;
+        }
+      }
+
+      document.getElementById("form").onsubmit = function () {
+        if (!conn) {
+          return false;
+        }
+        if (!userinput.value) {
+          return false;
+        }
+        if (!username) {
+          username = "Anonymous";
+        }
+        conn.send(username + "Ω" + userinput.value);
+        userinput.value = "";
+        return false;
+      };
+
+      if (window["WebSocket"]) {
+        conn = new WebSocket("ws://" + document.location.host + "/ws?username=" + username);
+        conn.onclose = function (evt) {
+          var item = document.createElement("div");
+          item.innerHTML = "<b>Connection closed.</b>";
+          appendLog(item);
+        };
+        conn.onmessage = function (evt) {
+          var messages = evt.data.split('\n');
+          for (var i = 0; i < messages.length; i++) {
+            var item = document.createElement("div");
+            item.innerText = messages[i];
+            if (messages[i].charAt(0) === "~") {
+              setPrompt(messages[i]);
+            } else if (messages[i].charAt(0) === "*") {
+              setPoints(messages[i]);
+            } else {
+              appendLog(item);
+            }
+          }
+        };
+      } else {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+        appendLog(item);
+      }
+    };
+    </script>
+    <style type="text/css">
+    html {
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    body {
+      overflow: hidden;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: papayawhip;
+    }
+
+    #promptWrapper {
+      background-color: #555;
+      height: 30%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #prompt {
+      display: flex;
+      color: #df9;
+      font-size: 1.6rem;
+    }
+
+    #log {
+      background: white;
+      height: 30%;
+      margin: 0;
+      padding: 0.5em 0.5em 0.5em 0.5em;
+      overflow: auto;
+    }
+
+    #form {
+      padding: 0 0.5em 0 0.5em;
+      margin: 0;
+      width: 100%;
+      height: 30%;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #userinput {
+      margin-left: 1rem;
+      padding: 0.5rem;
+    }
+
+    #submitbutton {
+      font-size: 1.2rem;
+    }
+
+    </style>
+  </head>
+  <body>
+    <div id="promptWrapper">
+      <pre id="prompt">Chanter Présent</pre>
+    </div>
+    <form id="form">
+      <div style="text-align: center;">
+        <span id="usernameLabel"></span>:&nbsp;
+        <span id="pointsLabel">0</span>&nbsp;point(s)
+        <br><br>
+        <input type="text" id="userinput" size="16" autofocus />
+        <input type="submit" id="submitbutton" value="Send (or press Enter)" />
+      </div>
+    </form>
+    <div id="log"></div>
+  </body>
+</html>
