@@ -26,10 +26,6 @@ func servePlay(w http.ResponseWriter, r *http.Request) {
     http.ServeFileFS(w, r, templates, "templates/play.html")
 }
 
-func serveDebug(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintln(w, "debug endpoint")
-}
-
 func main() {
     flag.Parse()
     hub := newHub()
@@ -37,10 +33,9 @@ func main() {
     hub.newQuestion()
 
     mux := http.NewServeMux()
-    mux.HandleFunc("GET /{$}", serveRegister)
-    mux.HandleFunc("GET /play", servePlay)
-    mux.HandleFunc("GET /debug", serveDebug)
-    mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+    mux.HandleFunc("GET /quizlounge", serveRegister)
+    mux.HandleFunc("GET /quizlounge/play", servePlay)
+    mux.HandleFunc("/quizlounge/ws", func(w http.ResponseWriter, r *http.Request) {
         serveWs(hub, w, r)
     })
 
