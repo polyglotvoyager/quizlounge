@@ -10,16 +10,20 @@ import (
     "log"
     "os"
     "net/http"
+    "embed"
 )
+
+//go:embed templates
+var templates embed.FS
 
 var addr = flag.String("addr", ":8100", "http service address")
 
 func serveRegister(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "register.html")
+    http.ServeFileFS(w, r, templates, "templates/register.html")
 }
 
 func servePlay(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "play.html")
+    http.ServeFileFS(w, r, templates, "templates/play.html")
 }
 
 func serveDebug(w http.ResponseWriter, r *http.Request) {
